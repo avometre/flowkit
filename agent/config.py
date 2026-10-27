@@ -7,6 +7,20 @@ from pathlib import Path
 BASE_DIR = Path(os.environ.get("FLOW_AGENT_DIR", Path(__file__).parent.parent))
 DB_PATH = BASE_DIR / "flow_agent.db"
 
+# ─── Load .env if present ─────────────────────────────────────
+_ENV_FILE = BASE_DIR / ".env"
+if _ENV_FILE.exists():
+    try:
+        for _line in _ENV_FILE.read_text(encoding="utf-8").splitlines():
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                _k, _v = _k.strip(), _v.strip().strip("'\"")
+                if _k not in os.environ:
+                    os.environ[_k] = _v
+    except Exception:
+        pass
+
 # ─── API Server ──────────────────────────────────────────────
 API_HOST = os.environ.get("API_HOST", "127.0.0.1")
 API_PORT = int(os.environ.get("API_PORT", "8100"))
